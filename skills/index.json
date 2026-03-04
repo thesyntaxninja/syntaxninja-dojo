@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "hash": "sha256:76cc3b7cab99a4710b8dbedef48cf8b34a2886f24775bccffac6d89de30a940e",
+  "updated": "2026-03-04T06:53:57.814Z",
+  "skills": [
+    {
+      "name": "scope-control",
+      "description": "Use when any task is received — silently enforces smallest viable change set and proposes decomposition for large tasks",
+      "tags": [
+        "gate",
+        "scope",
+        "discipline"
+      ],
+      "triggers": [
+        "always"
+      ],
+      "chains_to": [
+        "ralph-loop",
+        "writing-plans"
+      ],
+      "priority": "gate",
+      "gate": true
+    },
+    {
+      "name": "self-review",
+      "description": "Use when implementation is complete and verification has passed — dispatches the sensei agent for fresh-context quality review",
+      "tags": [
+        "gate",
+        "review",
+        "quality"
+      ],
+      "triggers": [
+        "implementation complete",
+        "verification passed",
+        "before commit",
+        "before PR"
+      ],
+      "chains_to": [
+        "compound-docs"
+      ],
+      "priority": "gate",
+      "gate": true
+    },
+    {
+      "name": "systematic-debugging",
+      "description": "Use when encountering any bug, test failure, unexpected behavior, or error message — before proposing any fix",
+      "tags": [
+        "gate",
+        "debugging",
+        "process"
+      ],
+      "triggers": [
+        "bug",
+        "error",
+        "fail",
+        "unexpected",
+        "broken",
+        "crash",
+        "wrong output",
+        "exception",
+        "panic"
+      ],
+      "chains_to": [
+        "test-driven-development",
+        "verification-before-completion"
+      ],
+      "priority": "gate",
+      "gate": true
+    },
+    {
+      "name": "verification-before-completion",
+      "description": "Use when about to claim work is complete, fixed, or passing — requires running verification commands and confirming output before making any success claims",
+      "tags": [
+        "gate",
+        "verification",
+        "quality"
+      ],
+      "triggers": [
+        "done",
+        "complete",
+        "fixed",
+        "passing",
+        "ready",
+        "finished",
+        "works now"
+      ],
+      "chains_to": [
+        "self-review"
+      ],
+      "priority": "gate",
+      "gate": true
+    }
+  ]
+}

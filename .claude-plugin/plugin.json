@@ -1,0 +1,25 @@
+{
+  "name": "syntaxninja-dojo",
+  "version": "0.1.0",
+  "description": "Train your AI to write disciplined code. Auto-invoked workflow skills, code pattern enforcement, quality gates, and autonomous looping.",
+  "author": {
+    "name": "thesyntaxninja"
+  },
+  "homepage": "https://github.com/thesyntaxninja/syntaxninja-dojo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thesyntaxninja/syntaxninja-dojo.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "workflows",
+    "patterns",
+    "code-review",
+    "quality",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/"
+}

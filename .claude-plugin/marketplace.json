@@ -1,0 +1,22 @@
+{
+  "name": "syntaxninja-dojo-marketplace",
+  "owner": {
+    "name": "thesyntaxninja"
+  },
+  "metadata": {
+    "description": "SyntaxNinja Dojo — Train your AI to write disciplined code.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "syntaxninja-dojo",
+      "source": "./",
+      "description": "Auto-invoked workflow skills, code pattern enforcement, quality gates, and autonomous looping for Claude Code.",
+      "version": "0.1.0",
+      "keywords": ["claude-code", "plugin", "workflows", "patterns", "quality"],
+      "category": "productivity",
+      "skills": "./skills/",
+      "agents": "./agents/"
+    }
+  ]
+}

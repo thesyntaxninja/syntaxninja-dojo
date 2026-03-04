@@ -1,0 +1,61 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
+CHARTER_FILE="$PLUGIN_ROOT/skills/_charter/SKILL.md"
+
+if [ ! -f "$CHARTER_FILE" ]; then
+    echo '{"error": "Dojo Charter not found at '"$CHARTER_FILE"'"}'
+    exit 1
+fi
+
+CHARTER_CONTENT=$(cat "$CHARTER_FILE")
+
+VERSION=$(jq -r '.version // "0.1.0"' "$PLUGIN_ROOT/.claude-plugin/plugin.json" 2>/dev/null || echo "0.1.0")
+
+# --- Lazy setup: ensure runtime directories and agent symlinks exist ---
+mkdir -p .claude/plugin/ralph/notes .claude/plugin/runs .claude/plugin/cache .claude/plugin/state .claude/plugin/worktrees
+
+# Symlink agents into .claude/agents/ if not already present
+if [ -d "$PLUGIN_ROOT/agents" ]; then
+    mkdir -p .claude/agents
+    for agent_dir in "$PLUGIN_ROOT/agents"/*/; do
+        [ -d "$agent_dir" ] || continue
+        dirname=$(basename "$agent_dir")
+        if [ ! -e ".claude/agents/$dirname" ]; then
+            ln -sf "$agent_dir" ".claude/agents/$dirname"
+        fi
+    done
+fi
+
+# Build index if missing (first run)
+if [ ! -f "$PLUGIN_ROOT/skills/index.json" ]; then
+    if command -v npx &>/dev/null && [ -f "$PLUGIN_ROOT/scripts/build-index.ts" ]; then
+        npx tsx "$PLUGIN_ROOT/scripts/build-index.ts" 2>/dev/null || true
+    fi
+fi
+
+# --- Detect project config ---
+# Option A: dojo.config.md at repo root (discoverable)
+# Falls back to .claude/dojo-config.md for backwards compat
+PROJECT_CONFIG="none"
+if [ -f "dojo.config.md" ]; then
+    PROJECT_CONFIG="dojo.config.md"
+elif [ -f ".claude/dojo-config.md" ]; then
+    PROJECT_CONFIG=".claude/dojo-config.md"
+fi
+
+# --- Dual fingerprint for interop with other routers ---
+FINGERPRINT="PLUGIN_ROUTER: syntaxninja-dojo@${VERSION}\nDOJO_ROUTER: syntaxninja-dojo@${VERSION}"
+
+# Build the additional context payload
+# Compatible with both Claude Code and Cursor hook schemas
+cat <<HOOKEOF
+{
+  "hookSpecificOutput": {
+    "additionalContext": "${FINGERPRINT}\n\nYou have the SyntaxNinja Dojo plugin installed.\n\n**Below is the full content of the Dojo Charter — your guide to using skills. For all other skills, use the Skill tool:**\n\n---\n${CHARTER_CONTENT}\n\n---\n\nSKILL_INDEX: ${PLUGIN_ROOT}/skills/index.json\nPATTERN_INDEX: ${PLUGIN_ROOT}/patterns/index.json\nPROJECT_CONFIG: ${PROJECT_CONFIG}"
+  },
+  "additional_context": "${FINGERPRINT}\n\nYou have the SyntaxNinja Dojo plugin installed.\n\n**Below is the full content of the Dojo Charter — your guide to using skills. For all other skills, use the Skill tool:**\n\n---\n${CHARTER_CONTENT}\n\n---\n\nSKILL_INDEX: ${PLUGIN_ROOT}/skills/index.json\nPATTERN_INDEX: ${PLUGIN_ROOT}/patterns/index.json\nPROJECT_CONFIG: ${PROJECT_CONFIG}"
+}
+HOOKEOF
