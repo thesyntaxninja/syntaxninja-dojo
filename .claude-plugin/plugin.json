@@ -6,10 +6,7 @@
     "name": "thesyntaxninja"
   },
   "homepage": "https://github.com/thesyntaxninja/syntaxninja-dojo",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/thesyntaxninja/syntaxninja-dojo.git"
-  },
+  "repository": "https://github.com/thesyntaxninja/syntaxninja-dojo",
   "license": "MIT",
   "keywords": [
     "claude-code",
@@ -19,8 +16,5 @@
     "code-review",
     "quality",
     "automation"
-  ],
-  "skills": "./skills/",
-  "agents": "./agents/",
-  "hooks": "./hooks/hooks.json"
+  ]
 }
