@@ -49,8 +49,9 @@ After 3 consistent usages, the Sensei proposes a pattern automatically.
 ### Training Loop
 
 When a task is too big for one context window, the Dojo decomposes it into pass/fail
-stories and runs them in an autonomous loop — fresh context per story, persistent state
-via files, git checkpoint between rounds. Worktree by default so your branch stays clean.
+stories and runs them in an autonomous loop via a Stop hook — the same interactive session
+continues, checking prd.json for completion after each iteration. No external scripts,
+no subprocess. It activates automatically when scope demands it.
 
 ## Install
 
@@ -122,7 +123,7 @@ npx tsx scripts/build-index.ts
 |-------|---------|
 | `ralph-loop` | Autonomous loop for tasks exceeding one context window |
 | `story-decomposition` | Break large tasks into independent, verifiable stories |
-| `prd-generator` | Generate PRD artifacts for the loop runner |
+| `prd-generator` | Generate prd.json and progress.txt for the loop |
 
 ### Code Review Skills
 
@@ -226,7 +227,6 @@ Config hierarchy (highest precedence first):
 |--------|---------|
 | `scripts/build-index.ts` | Rebuild skill + pattern indexes with CSO lint |
 | `scripts/build-index.sh` | Shell wrapper for build-index.ts |
-| `scripts/ralph-loop.sh` | Autonomous loop runner |
 | `scripts/setup.sh` | Set up plugin in a project (dirs, symlinks, index) |
 | `scripts/cleanup.sh` | Remove runtime state from a project |
 
@@ -235,8 +235,8 @@ Config hierarchy (highest precedence first):
 ```
 syntaxninja-dojo/
 ├── .claude-plugin/          # Plugin manifests
-├── hooks/                   # Session-start + prompt-submit hooks
-├── scripts/                 # Index builder, ralph loop, setup, cleanup
+├── hooks/                   # Session-start, prompt-submit, and stop hooks
+├── scripts/                 # Index builder, setup, cleanup
 ├── skills/                  # 20 skill definitions (SKILL.md per skill)
 │   ├── _charter/            # Bootstrap skill (the Dojo Charter)
 │   ├── 4 gate skills        # Always active, invisible unless triggered
