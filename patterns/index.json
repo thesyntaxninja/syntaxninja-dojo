@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "hash": "sha256:aa87c24a426bdf2692f17147e81d2011ab9b811cf8b52d3a67d54e5dc22b0332",
-  "updated": "2026-03-04T07:10:48.629Z",
+  "updated": "2026-03-04T16:13:53.072Z",
   "patterns": [
     {
       "name": "structure-domain-first",

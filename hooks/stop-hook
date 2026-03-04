@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Stop hook for syntaxninja-dojo ralph loop
+# Intercepts session exit when an active ralph loop is running.
+# Completion: reads prd_path from state file, checks all stories.passes == true.
+
+set -euo pipefail
+
+# Read hook input from stdin (Stop hook API: JSON with session_id, transcript_path)
+HOOK_INPUT=$(cat)
+
+RALPH_STATE_FILE=".claude/ralph-loop.local.md"
+
+# No state file → allow exit (not in a loop)
+if [[ ! -f "$RALPH_STATE_FILE" ]]; then
+    exit 0
+fi
+
+# Parse YAML frontmatter (between first and second --- lines)
+FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$RALPH_STATE_FILE")
+
+ITERATION=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//')
+MAX_ITERATIONS=$(echo "$FRONTMATTER" | grep '^max_iterations:' | sed 's/max_iterations: *//')
+PRD_PATH=$(echo "$FRONTMATTER" | grep '^prd_path:' | sed 's/prd_path: *//')
+STATE_SESSION=$(echo "$FRONTMATTER" | grep '^session_id:' | sed 's/session_id: *//' || true)
+
+# Session isolation: only the session that started the loop gets blocked.
+# Other sessions in the same project pass through.
+HOOK_SESSION=$(echo "$HOOK_INPUT" | jq -r '.session_id // ""')
+if [[ -n "$STATE_SESSION" ]] && [[ "$STATE_SESSION" != "$HOOK_SESSION" ]]; then
+    exit 0
+fi
+
+# Validate numeric fields
+if [[ ! "$ITERATION" =~ ^[0-9]+$ ]]; then
+    echo "Ralph loop: state file corrupted (iteration). Removing state file." >&2
+    rm "$RALPH_STATE_FILE"
+    exit 0
+fi
+
+if [[ ! "$MAX_ITERATIONS" =~ ^[0-9]+$ ]]; then
+    echo "Ralph loop: state file corrupted (max_iterations). Removing state file." >&2
+    rm "$RALPH_STATE_FILE"
+    exit 0
+fi
+
+# Max iterations safety net
+if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $ITERATION -ge $MAX_ITERATIONS ]]; then
+    echo "Ralph loop: max iterations ($MAX_ITERATIONS) reached. Loop complete." >&2
+    rm "$RALPH_STATE_FILE"
+    exit 0
+fi
+
+# PRD completion check — the core dojo-specific logic
+REMAINING="?"
+NEXT_STORY="unknown"
+
+if [[ -n "$PRD_PATH" ]] && [[ "$PRD_PATH" != "null" ]] && [[ -f "$PRD_PATH" ]]; then
+    # Check if all stories have passes == true
+    set +e
+    ALL_PASS=$(jq -r '[.stories[].passes] | all | tostring' "$PRD_PATH" 2>/dev/null)
+    JQ_EXIT=$?
+    set -e
+
+    if [[ $JQ_EXIT -eq 0 ]] && [[ "$ALL_PASS" == "true" ]]; then
+        echo "Ralph loop: all stories passing. Loop complete." >&2
+        rm "$RALPH_STATE_FILE"
+        exit 0
+    fi
+
+    # Gather stats for the system message
+    set +e
+    REMAINING=$(jq '[.stories[] | select(.passes == false)] | length' "$PRD_PATH" 2>/dev/null || echo "?")
+    NEXT_STORY=$(jq -r '
+        [.stories[] | select(.passes == false)] |
+        [.[] | select(
+            (.dependencies // []) as $deps |
+            all($deps[]; . as $dep | input_line_number >= 0) or ($deps | length == 0)
+        )][0].title // .[0].title // "unknown"
+    ' "$PRD_PATH" 2>/dev/null || echo "unknown")
+    # Simpler fallback for next story if the dependency check fails
+    if [[ "$NEXT_STORY" == "unknown" ]] || [[ -z "$NEXT_STORY" ]]; then
+        NEXT_STORY=$(jq -r '[.stories[] | select(.passes == false)][0].title // "unknown"' "$PRD_PATH" 2>/dev/null || echo "unknown")
+    fi
+    set -e
+fi
+
+# Not complete — increment iteration and continue loop
+NEXT_ITERATION=$((ITERATION + 1))
+
+# Update iteration counter atomically
+TEMP_FILE="${RALPH_STATE_FILE}.tmp.$$"
+sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$RALPH_STATE_FILE" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$RALPH_STATE_FILE"
+
+# Extract prompt body (everything after the closing --- of the frontmatter)
+PROMPT_TEXT=$(awk '/^---$/{i++; next} i>=2' "$RALPH_STATE_FILE")
+
+if [[ -z "$PROMPT_TEXT" ]]; then
+    echo "Ralph loop: state file has no prompt body. Removing state file." >&2
+    rm "$RALPH_STATE_FILE"
+    exit 0
+fi
+
+# Build system message with iteration context
+SYSTEM_MSG="Ralph iteration ${NEXT_ITERATION} of ${MAX_ITERATIONS} | Stories remaining: ${REMAINING} | Next: ${NEXT_STORY}"
+
+# Output block decision — prevents session exit, re-injects prompt
+jq -n \
+    --arg prompt "$PROMPT_TEXT" \
+    --arg msg "$SYSTEM_MSG" \
+    '{
+        "decision": "block",
+        "reason": $prompt,
+        "systemMessage": $msg
+    }'
+
+exit 0

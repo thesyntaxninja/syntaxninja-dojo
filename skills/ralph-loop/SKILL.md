@@ -12,7 +12,7 @@ gate: false
 
 ## Quick Reference
 
-For tasks too large for one context window: decompose into stories, generate loop artifacts, propose the loop to the user, and run autonomously with fresh context per iteration.
+For tasks too large for one context window: decompose into stories, generate prd.json, activate the Stop hook loop, and iterate inside the current session until all stories pass.
 
 ## When to Use
 
@@ -29,6 +29,19 @@ ALL of these must be true:
 - Stories don't have objective pass/fail criteria
 - User prefers manual step-by-step execution
 
+## How It Works
+
+The ralph loop uses Claude Code's Stop hook to keep the session alive:
+
+1. Claude writes `.claude/ralph-loop.local.md` (state file with loop prompt)
+2. Claude works on the first story in prd.json
+3. When the session tries to end, the Stop hook fires
+4. The hook reads prd.json — if all stories pass, it allows exit
+5. Otherwise, it re-injects the prompt and Claude continues with the next story
+6. No external scripts, no subprocess — the same interactive session continues
+
+This is fully automatic. The planning chain activates it when scope demands it.
+
 ## Core Process
 
 ### Step 1: Detection
@@ -42,131 +55,125 @@ During `writing-plans`, assess whether the task triggers ralph-loop conditions:
 | Context window fit | Plan + implementation won't fit in one session |
 | Story independence | Each story is verifiable in isolation |
 
-If ALL signals fire, propose the training loop.
+If ALL signals fire, propose the training loop to the user.
 
 ### Step 2: Prepare Artifacts
 
-Generate the following in `.claude/plugin/ralph/`:
+Chain to `story-decomposition` then `prd-generator`. This generates in `.claude/plugin/ralph/`:
 
-**`prd.json`** — the structured PRD:
-```json
-{
-  "title": "Feature Name",
-  "goal": "One-sentence goal",
-  "stories": [
-    {
-      "id": 1,
-      "title": "Story title",
-      "goal": "What this delivers",
-      "dependencies": [],
-      "files": ["path/to/file.ts"],
-      "acceptance": ["Condition 1", "Condition 2"],
-      "verification": "npm test -- --grep 'pattern'",
-      "passes": false
-    }
-  ],
-  "totalStories": 5,
-  "completedStories": 0
-}
-```
-
-**`progress.txt`** — human-readable progress log:
-```
-=== Ralph Loop: Feature Name ===
-Stories: 0/5 complete
-
-[ ] Story 1: Title
-[ ] Story 2: Title
-...
-```
-
-**`PROMPT.md`** — the prompt fed to each iteration:
-```markdown
-You are continuing a training loop. Read these files before doing anything:
-
-1. `.claude/plugin/ralph/prd.json` — the full PRD with story status
-2. `.claude/plugin/ralph/progress.txt` — current progress
-3. `CLAUDE.md` — project conventions
-
-## Your Task
-
-Find the FIRST story in prd.json where `passes` is `false`.
-Implement it. Run its verification command. If it passes, update
-prd.json (`passes: true`) and progress.txt. If it fails, debug
-and retry (max 3 attempts per story). Write notes to
-`.claude/plugin/ralph/notes/story-<id>.md`.
-
-If all stories pass, set status to "complete" in status.json.
-```
-
-**`status.json`** — loop state:
-```json
-{
-  "status": "ready",
-  "iteration": 0,
-  "completed_stories": []
-}
-```
+- **`prd.json`** — stories with `passes: false` initially
+- **`progress.txt`** — human-readable progress log
+- **`notes/`** — per-story implementation notes (written during iterations)
 
 ### Step 3: Propose to User
 
-Present the decomposition and ask for approval:
+Present the decomposition and ask for approval before activating:
 
 ```
-This task would benefit from a training loop.
+This task would benefit from a ralph loop.
 
-**Stories**: N stories, estimated X iterations
-**Approach**: Fresh context per story, git checkpoint between rounds
-**Isolation**: Worktree (default) — your branch stays clean
+**Stories**: N stories, max 20 iterations
+**Mechanism**: Stop hook — runs inside this session, fully interactive
+**Completion**: Automatic when all prd.json stories pass
 
 Stories:
 1. [Title] — [one-line goal]
 2. [Title] — [one-line goal]
 ...
 
-Approve? I'll set up the artifacts and provide the run command.
+Ready to start? I'll activate the loop now.
 ```
 
-### Step 4: Run Command
+**Do not activate without user approval.**
 
-After approval, provide the command:
+### Step 4: Activate the Loop
 
-```bash
-# Default: interactive (requires permission approval per iteration)
-bash scripts/ralph-loop.sh
-
-# Full automation (opt-in, requires SKIP_PERMISSIONS=true)
-SKIP_PERMISSIONS=true bash scripts/ralph-loop.sh
-
-# Custom max iterations
-bash scripts/ralph-loop.sh 15
-```
-
-The loop runs via `scripts/ralph-loop.sh`, which:
-1. Reads `PROMPT.md` and feeds it to `claude --print`
-2. Checkpoints via git after each story (configurable)
-3. Checks `status.json` and `prd.json` for completion
-4. Stops when all stories pass or max iterations reached
-
-### Step 5: Post-Loop
-
-After the loop completes:
-1. Review the results in `.claude/plugin/ralph/`
-2. Run full project verification
-3. If in a worktree, merge back to the main branch
-4. Chain to `verification-before-completion`
-
-## Configuration
-
-Set in `dojo.config.md` or `.claude/dojo-config.md`:
+After approval, write the state file `.claude/ralph-loop.local.md`:
 
 ```markdown
-## Training Loop
-- Max rounds: 20
-- Checkpoint: per-story          # none | per-iteration | per-story | end-only
-- Checkpoint style: squash       # normal | squash
-- Run in worktree: true
-- Skip permissions: false        # opt-in only
+---
+active: true
+iteration: 1
+session_id: <CLAUDE_CODE_SESSION_ID>
+max_iterations: 20
+prd_path: .claude/plugin/ralph/prd.json
+started_at: "<current ISO 8601 timestamp>"
+---
+
+Read .claude/plugin/ralph/prd.json. Find the first story where passes is false.
+Check its dependencies are met (all dependency story IDs must have passes: true).
+Implement the story following its acceptance criteria. Run the verification
+command. If it passes, update prd.json (set passes: true, increment
+completedStories) and progress.txt (mark [x]). Write implementation notes to
+.claude/plugin/ralph/notes/story-<id>.md. One story per iteration.
+
+If you are stuck on a story after 3 attempts, or blocked on something requiring
+human input, delete .claude/ralph-loop.local.md and explain what happened.
+```
+
+Write this file using the Write tool. The `session_id` should be read from the `CLAUDE_CODE_SESSION_ID` environment variable via Bash. The `max_iterations` defaults to 20 but can be adjusted based on story count or user preference.
+
+Then immediately begin working on the first story.
+
+### Step 5: Per-Iteration Behavior
+
+Each iteration (after the Stop hook re-injects the prompt):
+
+1. **Read prd.json** — find the first story where `passes` is `false`
+2. **Check dependencies** — if a dependency story has `passes: false`, skip to the next eligible story
+3. **Implement** — follow the story's acceptance criteria
+4. **Verify** — run the story's verification command
+5. **Update on success**:
+   - Set `passes: true` in prd.json for this story
+   - Increment `completedStories` in prd.json
+   - Mark `[x]` in progress.txt
+   - Write notes to `notes/story-<id>.md`
+6. **On failure** — debug (max 3 attempts per story), then note the failure and move on
+
+**ONE story per iteration.** Do not attempt multiple stories in one pass.
+
+### Step 6: Self-Exit Rules
+
+Claude MUST delete `.claude/ralph-loop.local.md` and stop when:
+
+- **Stuck**: Same story has failed 3+ consecutive attempts with no progress
+- **Blocked**: Something requires human input or a decision Claude can't make
+- **Error**: An unresolvable error prevents further work
+- **User request**: User explicitly asks to stop
+
+When self-exiting, explain:
+- Which story is blocked and why
+- What was attempted
+- What the user needs to do to unblock
+
+### Step 7: Post-Loop
+
+After the loop ends (all stories pass, self-exit, or max iterations):
+1. Review notes in `.claude/plugin/ralph/notes/`
+2. Summarize what was completed and what remains
+3. Run full project verification
+4. Chain to `verification-before-completion`
+
+## Three Exit Paths
+
+| Exit | Trigger | Who |
+|------|---------|-----|
+| All stories pass | prd.json check in Stop hook | Automatic |
+| Claude bails out | Claude deletes state file | Agent |
+| Safety net | max_iterations reached | Automatic |
+
+## Monitoring
+
+During the loop:
+```bash
+# Current iteration
+grep '^iteration:' .claude/ralph-loop.local.md
+
+# Story status
+jq '.stories[] | {title, passes}' .claude/plugin/ralph/prd.json
+
+# Progress
+cat .claude/plugin/ralph/progress.txt
 ```
 
 ## Anti-Patterns
@@ -175,9 +182,10 @@ Set in `dojo.config.md` or `.claude/dojo-config.md`:
 |--------------|----------------|
 | Using ralph-loop for small tasks | Overhead exceeds benefit. Just execute the plan. |
 | Stories without verification commands | The loop can't check if stories pass. |
-| Dependent stories without explicit ordering | Stories will fail due to missing prerequisites. |
-| Skipping user approval | The user must approve the decomposition and the autonomous run. |
-| Running without a worktree | Partial failures pollute the main branch. |
+| Attempting multiple stories per iteration | Context overflow; defeats the loop's purpose. |
+| Skipping user approval | The user must approve the decomposition before activation. |
+| Ignoring self-exit rules | Leads to infinite loops. Delete the state file when stuck. |
+| Running without a worktree on sensitive branches | Partial failures pollute the branch. |
 
 ## Chaining
 

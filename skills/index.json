@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "hash": "sha256:e706c69ce06a1e346c06b00c25a1de00d64c252ae52b240816f8a40a697c33f0",
-  "updated": "2026-03-04T07:10:48.627Z",
+  "hash": "sha256:fdbccf654b39e515fabdf8d27ca18233523cb2ced87e0a1eaa435c8062820745",
+  "updated": "2026-03-04T16:13:53.070Z",
   "skills": [
     {
       "name": "scope-control",
@@ -202,7 +202,7 @@
     },
     {
       "name": "prd-generator",
-      "description": "Use when a structured PRD document is needed for the ralph loop — generates prd.json, progress.txt, PROMPT.md, and status.json",
+      "description": "Use when a structured PRD document is needed for the ralph loop — generates prd.json and progress.txt",
       "tags": [
         "process",
         "planning",
