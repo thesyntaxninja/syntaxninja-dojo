@@ -35,6 +35,5 @@ CONFIG: ${PROJECT_CONFIG}"
 
 # Uses jq to properly escape content for valid JSON
 jq -n --arg ctx "$REMINDER" '{
-  hookSpecificOutput: { additionalContext: $ctx },
-  additional_context: $ctx
+  hookSpecificOutput: { additionalContext: $ctx }
 }'

@@ -66,9 +66,7 @@ SKILL_INDEX: ${PLUGIN_ROOT}/skills/index.json
 PATTERN_INDEX: ${PLUGIN_ROOT}/patterns/index.json
 PROJECT_CONFIG: ${PROJECT_CONFIG}"
 
-# Compatible with both Claude Code and Cursor hook schemas
 # Uses jq to properly escape content (quotes, newlines) for valid JSON
 jq -n --arg ctx "$CONTEXT" '{
-  hookSpecificOutput: { additionalContext: $ctx },
-  additional_context: $ctx
+  hookSpecificOutput: { additionalContext: $ctx }
 }'
