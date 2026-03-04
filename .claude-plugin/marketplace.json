@@ -12,11 +12,7 @@
       "name": "syntaxninja-dojo",
       "source": "./",
       "description": "Auto-invoked workflow skills, code pattern enforcement, quality gates, and autonomous looping for Claude Code.",
-      "version": "0.1.0",
-      "keywords": ["claude-code", "plugin", "workflows", "patterns", "quality"],
-      "category": "productivity",
-      "skills": "./skills/",
-      "agents": "./agents/"
+      "version": "0.1.0"
     }
   ]
 }

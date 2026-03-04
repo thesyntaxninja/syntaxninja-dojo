@@ -33,11 +33,8 @@ SKILLS_HASH: ${SKILLS_HASH}
 PATTERNS_HASH: ${PATTERNS_HASH}
 CONFIG: ${PROJECT_CONFIG}"
 
-cat <<HOOKEOF
-{
-  "hookSpecificOutput": {
-    "additionalContext": "${REMINDER}"
-  },
-  "additional_context": "${REMINDER}"
-}
-HOOKEOF
+# Uses jq to properly escape content for valid JSON
+jq -n --arg ctx "$REMINDER" '{
+  hookSpecificOutput: { additionalContext: $ctx },
+  additional_context: $ctx
+}'

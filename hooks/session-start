@@ -47,15 +47,28 @@ elif [ -f ".claude/dojo-config.md" ]; then
 fi
 
 # --- Dual fingerprint for interop with other routers ---
-FINGERPRINT="PLUGIN_ROUTER: syntaxninja-dojo@${VERSION}\nDOJO_ROUTER: syntaxninja-dojo@${VERSION}"
+FINGERPRINT="PLUGIN_ROUTER: syntaxninja-dojo@${VERSION}
+DOJO_ROUTER: syntaxninja-dojo@${VERSION}"
 
 # Build the additional context payload
+CONTEXT="${FINGERPRINT}
+
+You have the SyntaxNinja Dojo plugin installed.
+
+**Below is the full content of the Dojo Charter — your guide to using skills. For all other skills, use the Skill tool:**
+
+---
+${CHARTER_CONTENT}
+
+---
+
+SKILL_INDEX: ${PLUGIN_ROOT}/skills/index.json
+PATTERN_INDEX: ${PLUGIN_ROOT}/patterns/index.json
+PROJECT_CONFIG: ${PROJECT_CONFIG}"
+
 # Compatible with both Claude Code and Cursor hook schemas
-cat <<HOOKEOF
-{
-  "hookSpecificOutput": {
-    "additionalContext": "${FINGERPRINT}\n\nYou have the SyntaxNinja Dojo plugin installed.\n\n**Below is the full content of the Dojo Charter — your guide to using skills. For all other skills, use the Skill tool:**\n\n---\n${CHARTER_CONTENT}\n\n---\n\nSKILL_INDEX: ${PLUGIN_ROOT}/skills/index.json\nPATTERN_INDEX: ${PLUGIN_ROOT}/patterns/index.json\nPROJECT_CONFIG: ${PROJECT_CONFIG}"
-  },
-  "additional_context": "${FINGERPRINT}\n\nYou have the SyntaxNinja Dojo plugin installed.\n\n**Below is the full content of the Dojo Charter — your guide to using skills. For all other skills, use the Skill tool:**\n\n---\n${CHARTER_CONTENT}\n\n---\n\nSKILL_INDEX: ${PLUGIN_ROOT}/skills/index.json\nPATTERN_INDEX: ${PLUGIN_ROOT}/patterns/index.json\nPROJECT_CONFIG: ${PROJECT_CONFIG}"
-}
-HOOKEOF
+# Uses jq to properly escape content (quotes, newlines) for valid JSON
+jq -n --arg ctx "$CONTEXT" '{
+  hookSpecificOutput: { additionalContext: $ctx },
+  additional_context: $ctx
+}'
