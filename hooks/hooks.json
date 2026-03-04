@@ -6,20 +6,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "'${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd' session-start",
-            "async": false
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-start"
           }
         ]
       }
     ],
     "UserPromptSubmit": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "'${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd' prompt-submit",
-            "async": false
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/prompt-submit"
           }
         ]
       }
