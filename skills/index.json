@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "hash": "sha256:76cc3b7cab99a4710b8dbedef48cf8b34a2886f24775bccffac6d89de30a940e",
-  "updated": "2026-03-04T06:53:57.814Z",
+  "hash": "sha256:3e83ba4751fe56b10b2deb7f9c265ab57c646a24819ef64d12c86ee5c4a14276",
+  "updated": "2026-03-04T07:15:00.000Z",
   "skills": [
     {
       "name": "scope-control",
@@ -89,6 +89,140 @@
       ],
       "priority": "gate",
       "gate": true
+    },
+    {
+      "name": "brainstorming",
+      "description": "Use when requirements are unclear, ambiguous, or have multiple valid interpretations — before planning or implementing",
+      "tags": [
+        "process",
+        "planning",
+        "discovery"
+      ],
+      "triggers": [
+        "unclear requirements",
+        "ambiguous",
+        "explore approaches",
+        "what should we build",
+        "help me think through",
+        "multiple valid interpretations",
+        "new feature with unknowns"
+      ],
+      "chains_to": [
+        "writing-plans"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "writing-plans",
+      "description": "Use when a task requires multiple steps and benefits from a structured plan before implementation begins",
+      "tags": [
+        "process",
+        "planning",
+        "architecture"
+      ],
+      "triggers": [
+        "plan",
+        "implement feature",
+        "multi-step task",
+        "architecture decision",
+        "new feature",
+        "requirements clear"
+      ],
+      "chains_to": [
+        "executing-plans",
+        "ralph-loop"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "executing-plans",
+      "description": "Use when an approved plan exists and implementation should begin — executes steps sequentially with verification checkpoints",
+      "tags": [
+        "process",
+        "execution",
+        "implementation"
+      ],
+      "triggers": [
+        "approved plan",
+        "start implementing",
+        "execute plan",
+        "begin work",
+        "plan approved"
+      ],
+      "chains_to": [
+        "verification-before-completion",
+        "self-review",
+        "subagent-driven-development"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "test-driven-development",
+      "description": "Use when implementing any feature or bugfix where tests can be written first — write the test, see it fail, make it pass, refactor",
+      "tags": [
+        "process",
+        "testing",
+        "discipline"
+      ],
+      "triggers": [
+        "implement feature",
+        "add test",
+        "bugfix with regression test",
+        "TDD",
+        "test first",
+        "write tests"
+      ],
+      "chains_to": [
+        "verification-before-completion"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "subagent-driven-development",
+      "description": "Use when executing an implementation plan with independent tasks that can be delegated to subagents within the current session",
+      "tags": [
+        "process",
+        "execution",
+        "parallel",
+        "agents"
+      ],
+      "triggers": [
+        "parallel tasks in plan",
+        "independent implementation steps",
+        "delegate to agents",
+        "multiple files same pattern"
+      ],
+      "chains_to": [
+        "verification-before-completion",
+        "self-review"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "description": "Use when facing 2+ independent tasks that can be researched or implemented by agents without shared state or sequential dependencies",
+      "tags": [
+        "process",
+        "parallel",
+        "agents",
+        "orchestration"
+      ],
+      "triggers": [
+        "multiple independent tasks",
+        "parallel research",
+        "concurrent investigation",
+        "fan-out work"
+      ],
+      "chains_to": [
+        "verification-before-completion"
+      ],
+      "priority": "core",
+      "gate": false
     }
   ]
 }
