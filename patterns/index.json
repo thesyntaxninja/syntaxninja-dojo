@@ -1,6 +1,99 @@
 {
   "version": "1.0.0",
-  "hash": "sha256:ab2518c3d58439b59a93a6cc5f60d2e388cedc57269b018f9ab9c37590df8657",
-  "updated": "2026-03-04T06:53:57.816Z",
-  "patterns": []
+  "hash": "sha256:aa87c24a426bdf2692f17147e81d2011ab9b811cf8b52d3a67d54e5dc22b0332",
+  "updated": "2026-03-04T07:02:53.078Z",
+  "patterns": [
+    {
+      "name": "structure-domain-first",
+      "type": "structure",
+      "library": "",
+      "severity": "p3",
+      "detect": [],
+      "signatures": [],
+      "file_globs": [
+        "**/*"
+      ],
+      "tags": [
+        "organization",
+        "architecture"
+      ],
+      "autofix": "",
+      "extends": ""
+    },
+    {
+      "name": "structure-test-colocation",
+      "type": "structure",
+      "library": "",
+      "severity": "p3",
+      "detect": [],
+      "signatures": [],
+      "file_globs": [
+        "**/*"
+      ],
+      "tags": [
+        "testing",
+        "organization"
+      ],
+      "autofix": "",
+      "extends": ""
+    },
+    {
+      "name": "tanstack-query",
+      "type": "library",
+      "library": "@tanstack/react-query",
+      "severity": "p2",
+      "detect": [
+        "from '@tanstack/react-query'",
+        "from \\\"@tanstack/react-query\\\"",
+        "from '@tanstack/query-core'"
+      ],
+      "signatures": [
+        "useQuery(",
+        "useMutation(",
+        "queryKey:",
+        "queryFn:",
+        "useQueryClient(",
+        "QueryClient"
+      ],
+      "file_globs": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "tags": [
+        "data-fetching",
+        "react",
+        "async"
+      ],
+      "autofix": "",
+      "extends": ""
+    },
+    {
+      "name": "zustand",
+      "type": "library",
+      "library": "zustand",
+      "severity": "p2",
+      "detect": [
+        "from 'zustand'",
+        "from \\\"zustand\\\"",
+        "import { create }"
+      ],
+      "signatures": [
+        "create<",
+        "create(",
+        "set((",
+        "useStore(",
+        "getState()"
+      ],
+      "file_globs": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "tags": [
+        "state-management",
+        "react"
+      ],
+      "autofix": "",
+      "extends": ""
+    }
+  ]
 }

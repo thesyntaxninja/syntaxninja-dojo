@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "hash": "sha256:3e83ba4751fe56b10b2deb7f9c265ab57c646a24819ef64d12c86ee5c4a14276",
-  "updated": "2026-03-04T07:15:00.000Z",
+  "hash": "sha256:8eb565dc076df04d13ca4caca5858c330bfce93e2b219c3212cf80f961257c5b",
+  "updated": "2026-03-04T07:02:53.076Z",
   "skills": [
     {
       "name": "scope-control",
@@ -114,24 +114,22 @@
       "gate": false
     },
     {
-      "name": "writing-plans",
-      "description": "Use when a task requires multiple steps and benefits from a structured plan before implementation begins",
+      "name": "dispatching-parallel-agents",
+      "description": "Use when facing 2+ independent tasks that can be researched or implemented by agents without shared state or sequential dependencies",
       "tags": [
         "process",
-        "planning",
-        "architecture"
+        "parallel",
+        "agents",
+        "orchestration"
       ],
       "triggers": [
-        "plan",
-        "implement feature",
-        "multi-step task",
-        "architecture decision",
-        "new feature",
-        "requirements clear"
+        "multiple independent tasks",
+        "parallel research",
+        "concurrent investigation",
+        "fan-out work"
       ],
       "chains_to": [
-        "executing-plans",
-        "ralph-loop"
+        "verification-before-completion"
       ],
       "priority": "core",
       "gate": false
@@ -160,28 +158,6 @@
       "gate": false
     },
     {
-      "name": "test-driven-development",
-      "description": "Use when implementing any feature or bugfix where tests can be written first — write the test, see it fail, make it pass, refactor",
-      "tags": [
-        "process",
-        "testing",
-        "discipline"
-      ],
-      "triggers": [
-        "implement feature",
-        "add test",
-        "bugfix with regression test",
-        "TDD",
-        "test first",
-        "write tests"
-      ],
-      "chains_to": [
-        "verification-before-completion"
-      ],
-      "priority": "core",
-      "gate": false
-    },
-    {
       "name": "subagent-driven-development",
       "description": "Use when executing an implementation plan with independent tasks that can be delegated to subagents within the current session",
       "tags": [
@@ -204,22 +180,46 @@
       "gate": false
     },
     {
-      "name": "dispatching-parallel-agents",
-      "description": "Use when facing 2+ independent tasks that can be researched or implemented by agents without shared state or sequential dependencies",
+      "name": "test-driven-development",
+      "description": "Use when implementing any feature or bugfix where tests can be written first — write the test, see it fail, make it pass, refactor",
       "tags": [
         "process",
-        "parallel",
-        "agents",
-        "orchestration"
+        "testing",
+        "discipline"
       ],
       "triggers": [
-        "multiple independent tasks",
-        "parallel research",
-        "concurrent investigation",
-        "fan-out work"
+        "implement feature",
+        "add test",
+        "bugfix with regression test",
+        "TDD",
+        "test first",
+        "write tests"
       ],
       "chains_to": [
         "verification-before-completion"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "writing-plans",
+      "description": "Use when a task requires multiple steps and benefits from a structured plan before implementation begins",
+      "tags": [
+        "process",
+        "planning",
+        "architecture"
+      ],
+      "triggers": [
+        "plan",
+        "implement feature",
+        "multi-step task",
+        "architecture decision",
+        "new feature",
+        "requirements clear"
+      ],
+      "chains_to": [
+        "executing-plans",
+        "ralph-loop"
       ],
       "priority": "core",
       "gate": false

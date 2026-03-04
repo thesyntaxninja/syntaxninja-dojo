@@ -64,6 +64,40 @@ VERDICT: PASS | PASS_WITH_NOTES | SIMPLIFY_FIRST | RETHINK
 - **SIMPLIFY_FIRST**: Has REMOVE items or non-trivial SIMPLIFY items. No P1 pattern mismatches. Triggers simplification loop (max 2 rounds).
 - **RETHINK**: Has P1 pattern mismatches, architectural concerns, or security issues. Discuss with user before proceeding.
 
+## Pattern Detection & Proposals
+
+While reviewing, track consistent code patterns that aren't yet captured in `patterns/index.json`.
+
+### 3-Occurrence Ratchet
+
+If you observe **3+ distinct occurrences** of a consistent pattern in the codebase (not just the current diff), propose a new pattern:
+
+```
+PATTERN PROPOSAL:
+- Name: <pattern-name>
+- Type: library | structure
+- Evidence:
+  1. file:line — [usage]
+  2. file:line — [usage]
+  3. file:line — [usage]
+- Suggested severity: p2 | p3
+- Summary: [one sentence describing the pattern]
+```
+
+**Rules for proposals:**
+- Only propose when you have 3+ **distinct** occurrences (not the same line repeated)
+- The pattern must be a deliberate choice, not coincidence
+- Never propose patterns that contradict existing patterns in the index
+- One proposal per review maximum — don't overwhelm
+
+### Pattern Compliance During Review
+
+When checking patterns:
+1. Read `patterns/index.json` to find applicable patterns
+2. For library patterns: check `detect` strings against imports, `signatures` against API usage
+3. For structure patterns: only check when the diff creates new files or moves existing ones
+4. Match on 2 of 3 signals (detect, file-globs, signatures) before flagging
+
 ## Constraints
 
 - Review only what changed in the diff. Do not review unrelated code.
