@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "hash": "sha256:cd9db276fe486ef371884a751fd79fbc15b163c0b15f338e287b183a1ca0ce88",
-  "updated": "2026-03-04T07:08:35.571Z",
+  "hash": "sha256:e706c69ce06a1e346c06b00c25a1de00d64c252ae52b240816f8a40a697c33f0",
+  "updated": "2026-03-04T07:10:48.627Z",
   "skills": [
     {
       "name": "scope-control",
@@ -180,6 +180,27 @@
       "gate": false
     },
     {
+      "name": "finishing-a-development-branch",
+      "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work — merge, PR, or cleanup",
+      "tags": [
+        "git",
+        "workflow",
+        "completion"
+      ],
+      "triggers": [
+        "work complete",
+        "ready to merge",
+        "create PR",
+        "finish branch",
+        "integration"
+      ],
+      "chains_to": [
+        "verification-before-completion"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
       "name": "prd-generator",
       "description": "Use when a structured PRD document is needed for the ralph loop — generates prd.json, progress.txt, PROMPT.md, and status.json",
       "tags": [
@@ -346,6 +367,27 @@
       ],
       "chains_to": [
         "verification-before-completion"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "using-git-worktrees",
+      "description": "Use when starting feature work that needs isolation from the current workspace or before executing plans that could leave the branch in a broken state",
+      "tags": [
+        "git",
+        "workflow",
+        "isolation"
+      ],
+      "triggers": [
+        "worktree",
+        "isolated work",
+        "parallel branch",
+        "protect main branch",
+        "feature isolation"
+      ],
+      "chains_to": [
+        "finishing-a-development-branch"
       ],
       "priority": "core",
       "gate": false
