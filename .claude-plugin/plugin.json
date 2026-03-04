@@ -1,6 +1,6 @@
 {
   "name": "syntaxninja-dojo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Train your AI to write disciplined code. Auto-invoked workflow skills, code pattern enforcement, quality gates, and autonomous looping.",
   "author": {
     "name": "thesyntaxninja"

@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "SyntaxNinja Dojo — Train your AI to write disciplined code.",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "plugins": [
     {
       "name": "syntaxninja-dojo",
       "source": "./",
       "description": "Auto-invoked workflow skills, code pattern enforcement, quality gates, and autonomous looping for Claude Code.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }
