@@ -55,16 +55,27 @@ via files, git checkpoint between rounds. Worktree by default so your branch sta
 ## Install
 
 ```bash
-claude plugin add thesyntaxninja/syntaxninja-dojo
+# Add the marketplace
+/plugin marketplace add thesyntaxninja/syntaxninja-dojo
+
+# Install the plugin (choose a scope)
+/plugin install syntaxninja-dojo --scope user      # All your projects
+/plugin install syntaxninja-dojo --scope project   # This project only (shared via git)
+/plugin install syntaxninja-dojo --scope local     # This project only (gitignored)
 ```
+
+Or test without installing:
+
+```bash
+claude --plugin-dir /path/to/syntaxninja-dojo
+```
+
+Verify it's loaded — skills show up as `/syntaxninja-dojo:skill-name` in `/help`.
 
 ## Quick Start
 
 ```bash
 # Nothing to configure. Start working.
-
-# Optional: set up agent symlinks and runtime directories
-bash /path/to/syntaxninja-dojo/scripts/setup.sh
 
 # Optional: project-specific settings
 cat > dojo.config.md << 'EOF'
