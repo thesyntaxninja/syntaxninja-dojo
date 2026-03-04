@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "hash": "sha256:ddb2340392ea1d95e404bd79ed333219f39b17f6ce8b3f89d32f7fbced46c3f2",
-  "updated": "2026-03-04T07:05:07.923Z",
+  "hash": "sha256:0b01c402fe51e42c0f6adf1d007a2476ed73ec638c0d433b9c3dcac206cae7cf",
+  "updated": "2026-03-04T07:07:09.686Z",
   "skills": [
     {
       "name": "scope-control",
@@ -199,6 +199,48 @@
         "verification-before-completion"
       ],
       "priority": "escalation",
+      "gate": false
+    },
+    {
+      "name": "receiving-code-review",
+      "description": "Use when receiving code review feedback — requires technical verification of each suggestion before implementing, not blind agreement",
+      "tags": [
+        "review",
+        "discipline",
+        "quality"
+      ],
+      "triggers": [
+        "review feedback",
+        "PR comments",
+        "code review response",
+        "reviewer says",
+        "feedback received"
+      ],
+      "chains_to": [
+        "verification-before-completion"
+      ],
+      "priority": "core",
+      "gate": false
+    },
+    {
+      "name": "requesting-code-review",
+      "description": "Use when implementation is complete and a comprehensive code review is needed — dispatches parallel review agents and merges findings",
+      "tags": [
+        "review",
+        "quality",
+        "agents"
+      ],
+      "triggers": [
+        "code review",
+        "review this",
+        "review my code",
+        "PR review",
+        "request review"
+      ],
+      "chains_to": [
+        "verification-before-completion"
+      ],
+      "priority": "core",
       "gate": false
     },
     {
